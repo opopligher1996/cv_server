@@ -4,7 +4,7 @@ from .forms import UploadFileForm
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.storage import FileSystemStorage
-# from scraping_project.main import run_scrapy
+from web_server.scraping_project.start_scrapy import run_spider
 import os
 import json
 
@@ -17,7 +17,8 @@ def upload_file(request):
         filename = fs.save('project_website_list.csv', myfile)
         file_url = fs.url(filename)
         form = UploadFileForm()
-        #run_scrapy()
+        print('start_scrapy')
+        run_spider()
         return render(request, 'upload.html', {
             'state': 'upload success',
             'form': form
