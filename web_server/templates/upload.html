@@ -7,9 +7,7 @@
     <body>
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div>
-          {{form}}
-        </div>
+        {{ form.as_p }}
         <button type="submit">Send</button>
       </form>
       {{state}}

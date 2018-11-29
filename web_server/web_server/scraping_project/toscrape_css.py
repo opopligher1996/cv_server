@@ -7,6 +7,7 @@ from scrapy import Request
 from elasticsearch import Elasticsearch, helpers
 from urlparse import urlparse
 from pprint import pprint
+from scrapy.exceptions import CloseSpider
 
 
 class ToScrapeCSSSpider(scrapy.Spider):

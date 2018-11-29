@@ -7,20 +7,11 @@ from twisted.internet import reactor
 from billiard import Process
 from scrapy.utils.project import get_project_settings
 
-def run_spider():
-    p = Process(target=_crawl)
-    p.start()
-    p.join()
-
-def _crawl():
-    process_leveltwo = CrawlerProcess({
-        'ELASTICSEARCH_URL': 'http://127.0.0.1:9200',
-        'DEPTH_LIMIT': '5'
-    })
+def run_spider(level):
 
     file_content =[]
 
-    with open("project_website_list.csv","rb") as csvfile:
+    with open("web_server/scraping_project/project_website_list.csv","rb") as csvfile:
     	reader = csv.DictReader(csvfile, delimiter=',', quotechar='\"')
     	for row in reader:
     		jdata = {}
@@ -33,8 +24,26 @@ def _crawl():
     for item in file_content:
     	url = item["website"]
         print('start '+url)
-        process_leveltwo.crawl(ToScrapeCSSSpider, "trail_two", level=2, start_urls=[url])
-        process_leveltwo.start(stop_after_crawl=True)
+        p = Process(target = test , args = (url,level))
+        p.start()
+        p.join()
         print('done '+url)
 
     return 0
+
+def test(url,level):
+    print('level = '+level)
+    if level=='1':
+        process_levelone = CrawlerProcess({
+            'ELASTICSEARCH_URL': 'http://127.0.0.1:9200',
+            'DEPTH_LIMIT': '2'
+        })
+        process_levelone.crawl(ToScrapeCSSSpider, "trail_two", level=1, start_urls=[url])
+        process_levelone.start(stop_after_crawl=True)
+    else:
+        process_leveltwo = CrawlerProcess({
+            'ELASTICSEARCH_URL': 'http://127.0.0.1:9200',
+            'DEPTH_LIMIT': '5'
+        })
+        process_leveltwo.crawl(ToScrapeCSSSpider, "trail_two", level=2, start_urls=[url])
+        process_leveltwo.start(stop_after_crawl=True)

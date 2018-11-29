@@ -13,12 +13,14 @@ def upload_file(request):
         form = UploadFileForm(request.POST, request.FILES)
         folder='web_server/scraping_project/'
         myfile = request.FILES['file']
+        level = request.POST.get('level')
         fs = FileSystemStorage(location=folder) #defaults to   MEDIA_ROOT
+        fs.delete('project_website_list.csv')
         filename = fs.save('project_website_list.csv', myfile)
         file_url = fs.url(filename)
         form = UploadFileForm()
         print('start_scrapy')
-        run_spider()
+        run_spider(level)
         return render(request, 'upload.html', {
             'state': 'upload success',
             'form': form
@@ -28,6 +30,3 @@ def upload_file(request):
     return render(request, 'upload.html', {
         'form': form,
     })
-
-def handle_uploaded_file(f):
-    print('handle_uploaded_file')
