@@ -7,30 +7,25 @@ from scrapy import Request
 from elasticsearch import Elasticsearch, helpers
 from urlparse import urlparse
 from pprint import pprint
-from scrapy.exceptions import CloseSpider
 
 
 class ToScrapeCSSSpider(scrapy.Spider):
     name = "toscrape-css"
-
-    def __init__(self, project_name, level, start_urls, allowed_domains):
-        print('__init__')
+    
+    def __init__(self, project_name, level, start_urls):
         if start_urls is not None:
             self.start_urls = start_urls
-            self.allowed_domains = allowed_domains
+            self.allowed_domains = [ urlparse(s).netloc for s in self.start_urls]
         self.project_name = project_name
         self.level = level
 
     def start_requests(self):
-        print('start_requests')
         self.actions = []
         if self.settings['ELASTICSEARCH_URL'] is not None:
             self.elasticsearch_url = self.settings['ELASTICSEARCH_URL']
         else:
             self.elasticsearch_url = 'http://127.0.0.1:9200'
-
-        print('self.allowed_domains')
-        print(type(self.allowed_domains))
+        
         for url in self.start_urls:
             item = {'start_url': url}
             request = Request(url, dont_filter=True)
@@ -42,13 +37,13 @@ class ToScrapeCSSSpider(scrapy.Spider):
         es = self.create_Elasticsearch(self.elasticsearch_url)
         url = urlparse(response.request.url)
         index_date = datetime.now().strftime('%Y.%m.%d')
-
+        
         params = ';{}'.format(url.params) if url.params != '' else ''
         query = '?{}'.format(url.query) if url.query != '' else ''
         fragment = '#{}'.format(url.fragment) if url.fragment != '' else ''
-        path = '{path}{params}{query}{fragment}'.format(path=url.path, params=params,
+        path = '{path}{params}{query}{fragment}'.format(path=url.path, params=params, 
             query=query, fragment=fragment)
-
+        
         title = response.css('title').extract_first().replace('<title>','').replace('</title>','');
         doc = {
             'domain_name': url.netloc,
@@ -57,21 +52,15 @@ class ToScrapeCSSSpider(scrapy.Spider):
             'title': title,
             'level': self.level,
             'url': path,
+            'project_name': self.project_name,
             'timestamp': datetime.now()
         }
         yield doc
         self.actions.append({
-            "_index": "cpr-" + self.project_name + "-" + index_date + "-2",
+            "_index": "cpr-" + self.project_name + "-" + index_date,
             "_type": "_doc",
             "_source": doc
         })
-
-        print('start print href')
-        print(self.allowed_domains)
-        for href in response.css("a::attr(href)").extract():
-            print('href = '+ response.urljoin(href))
-        print('finish print href')
-
         for href in response.css("a::attr(href)").extract():
             yield scrapy.Request(response.urljoin(href))
 

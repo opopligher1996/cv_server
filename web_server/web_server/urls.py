@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import url
 from django.template import loader
-from web_server.views import upload_file
+from web_server.views import upload_file, search
 
 urlpatterns = [
     url('admin/', admin.site.urls),
     url(r'^api/v0/upload', upload_file),
+    url(r'^search', search)
 ]

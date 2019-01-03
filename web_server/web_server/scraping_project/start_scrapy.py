@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
+import tldextract
 from scrapy.crawler import CrawlerProcess
 from scrapy.conf import settings
 from toscrape_css import ToScrapeCSSSpider
@@ -38,12 +39,18 @@ def test(url,level):
             'ELASTICSEARCH_URL': 'http://127.0.0.1:9200',
             'DEPTH_LIMIT': '2'
         })
-        process_levelone.crawl(ToScrapeCSSSpider, "trail_two", level=1, start_urls=[url])
+        allowed_domains = tldextract.extract(url).domain
+        if tldextract.extract(url).suffix!='':
+            allowed_domains = allowed_domains + '.' + tldextract.extract(url).suffix
+        process_levelone.crawl(ToScrapeCSSSpider, "trail_two", level=1, start_urls=[url], allowed_domains=[allowed_domains])
         process_levelone.start(stop_after_crawl=True)
     else:
         process_leveltwo = CrawlerProcess({
             'ELASTICSEARCH_URL': 'http://127.0.0.1:9200',
-            'DEPTH_LIMIT': '5'
+            'DEPTH_LIMIT': '6'
         })
-        process_leveltwo.crawl(ToScrapeCSSSpider, "trail_two", level=2, start_urls=[url])
+        allowed_domains = tldextract.extract(url).domain
+        if tldextract.extract(url).suffix!='':
+            allowed_domains = allowed_domains + '.' + tldextract.extract(url).suffix
+        process_leveltwo.crawl(ToScrapeCSSSpider, "trail_two", level=2, start_urls=[url], allowed_domains=[allowed_domains])
         process_leveltwo.start(stop_after_crawl=True)

@@ -19,7 +19,6 @@ def upload_file(request):
         filename = fs.save('project_website_list.csv', myfile)
         file_url = fs.url(filename)
         form = UploadFileForm()
-        print('start_scrapy')
         run_spider(level)
         return render(request, 'upload.html', {
             'state': 'upload success',
@@ -29,4 +28,10 @@ def upload_file(request):
         form = UploadFileForm()
     return render(request, 'upload.html', {
         'form': form,
+    })
+
+def search(request):
+    state = 'searching'
+    return render(request, 'search.html', {
+        'state': state,
     })
