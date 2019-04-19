@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.template import loader
 from web_server.views import upload_file, search
+from web_server.views import enter_face
 
 urlpatterns = [
     url('admin/', admin.site.urls),
     url(r'^api/v0/upload', upload_file),
-    url(r'^search', search)
+    url(r'^search', search),
+    url(r'^uploadface', enter_face)
 ]
